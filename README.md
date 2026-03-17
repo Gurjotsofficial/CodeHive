@@ -6,7 +6,7 @@ CodeHive is a real-time collaborative code editor that allows multiple users to 
 
 ## 🧠 Features
 
-* 🧑‍💻 Real-time collaborative editing (multiple users)
+* 🧑‍💻 Real-time collaborative code editing + execution(multiple users)
 * 📡 Live code synchronization using sockets
 * 🗂️ Workspace creation and management
 * 📄 Document-based code editing
