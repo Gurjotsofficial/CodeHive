@@ -198,4 +198,49 @@ Future<WorkspaceDocumentModel?> createDocument(
   }
 }
 
-}
+/// DELETE WORKSPACE DOCUMENT SERVICE
+Future<bool> deleteWorkspaceDocument(String documentId) async{
+    debugPrint('Delete Document Service Called');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+         String? token = prefs.getString(AuthServices.AUTHKEY);
+
+          if(token != null && token.isNotEmpty){
+              debugPrint('token found');
+              // debugPrint("${AuthServices.AUTHKEY} = $token");
+
+              // here we store our response from the api hit in a response named varialbe
+              http.Response response = await http.delete(Uri.parse("http://localhost:4000/api/v1/deleteWorkspaceDocument/$documentId"),
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization" : "Bearer $token"
+              }
+              );
+              debugPrint(response.statusCode.toString());
+              
+
+              if(response.statusCode == 200){
+                final data = response.body.toString();
+                debugPrint(data);
+                debugPrint('Documents Deleted');
+                return true;
+              }
+                else{
+                  debugPrint('Error in deleting the document');
+                return false;
+                }
+              }
+              else{
+                debugPrint('token not found');
+                return false;
+                } 
+    } catch (e) {
+        debugPrint(e.toString());
+        return false;
+    }
+  }
+
+
+
+} // Class Ends Here
+

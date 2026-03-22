@@ -1,7 +1,7 @@
 class WorkspaceDocumentModel {
   final String id;
   final String name;
-  final String content;
+   String content;
   final DateTime updatedAt;
 
   WorkspaceDocumentModel({

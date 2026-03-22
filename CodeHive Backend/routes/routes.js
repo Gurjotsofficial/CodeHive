@@ -111,6 +111,38 @@ router.get('/get_workspace', isValidUser ,async(req,res) => {
     }
 });
 
+router.get('/join_room/:workspace_id', isValidUser, async(req,res) => {
+    try{
+        const workspace_id = req.params.workspace_id;
+        if(!workspace_id){
+            return res.status(400).json({
+                success:false,
+                message:'Please enter a Workspace Id'
+            });
+        }
+        const workspace = await WORKSPACE.findById(workspace_id);
+        if(!workspace){
+            return res.status(404).json({
+                success:false,
+                message:'Room doesn\'t exist'
+            })
+        }
+        return res.status(200).json({
+            success : true,
+            workspace : workspace,
+            message : 'Room fetched Successfully'
+        })
+
+    }catch(e){
+        console.error(e)
+        return res.status(500).json({
+                success : false,
+                message : "Error in joining room"
+            })
+    }
+})
+
+
 
 // Workspace Documents Routes
 // Create Document Route Handler
@@ -175,7 +207,7 @@ router.get('/getWorkspaceDocument/:workspace_id', isValidUser ,async(req,res) =>
         });
         }
 
-        if(workspace.owner_id.toString() == owner_id.toString()){
+        // if(workspace.owner_id.toString() == owner_id.toString()){
 
             const document = await DOCUMENT.find({workspace_id});
         
@@ -184,12 +216,12 @@ router.get('/getWorkspaceDocument/:workspace_id', isValidUser ,async(req,res) =>
                     document : document,
                     message : "Documents Fetched Successfully"
                 });
-        }else{
-            return res.status(403).json({
-                success: false,
-                message: "You do not have access to this workspace",
-                });
-        }
+        // }else{
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: "You do not have access to this workspace",
+        //         });
+        // }
         
 
     }catch(e){
@@ -201,7 +233,7 @@ router.get('/getWorkspaceDocument/:workspace_id', isValidUser ,async(req,res) =>
     }
 });
 
-// Update Workspace Route Handler
+// Update Workspace Document Route Handler
 router.put('/updateWorkspaceDocument/:document_id', isValidUser ,async(req,res) => {
     try{
         const document_id = req.params.document_id;
@@ -257,6 +289,75 @@ router.put('/updateWorkspaceDocument/:document_id', isValidUser ,async(req,res) 
             })
     }
 });
+
+
+// DELETE DOCUMENT HANDLER
+router.delete('/deleteWorkspaceDocument/:document_id', isValidUser, async(req,res) => {
+    try{
+        const document_id = req.params.document_id
+        const owner_id = req.loginuser.id;
+
+        const document = await DOCUMENT.findById(document_id);
+
+        if (!document) {
+            return res.status(404).json({
+                success: false,
+                message: "Document not found",
+            });
+            }
+        
+        const workspace = await WORKSPACE.findById(document.workspace_id);
+
+        if (!workspace) {
+            return res.status(404).json({
+                success: false,
+                message: "Workspace not found",
+            });
+            }
+
+        if(workspace.owner_id.toString() == owner_id.toString()){
+            await DOCUMENT.findByIdAndDelete(document_id);
+            return res.status(200).json({
+                success : true,
+                message : "WorkSpace Document Deleted Successfully "
+            })
+        }else{
+            return res.status(403).json({
+                success : false,
+                message : "You do not have permission to delete this document"
+            })
+        }
+
+    }catch(e){
+        console.error(e)
+        return res.status(500).json({
+                success : false,
+                message : "Error is occuring"
+            })
+    }
+    
+
+}) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

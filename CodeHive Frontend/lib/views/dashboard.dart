@@ -3,6 +3,7 @@ import 'package:collab_code_editor/user/userprovider.dart';
 import 'package:collab_code_editor/workspace/activeworkspaceprovider.dart';
 import 'package:collab_code_editor/workspace/workspaceprovider.dart';
 import 'package:flutter/material.dart';
+// import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:provider/provider.dart';
 
 class Dashboard extends StatefulWidget {
@@ -14,9 +15,11 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   
+  TextEditingController joinRoomController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     TextEditingController workspaceNameController = TextEditingController();
+
 
     final activeworkspaceprovider = context.watch<ActiveWorkspaceProvider>();
     final workspaceprovider = context.watch<Workspaceprovider>();
@@ -145,7 +148,9 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           SizedBox( width: 10,),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () async{
+                          joinRoom();
+                        },
                          child: Text('Join Room', 
                          style: TextStyle(
                                             fontSize: 14
@@ -177,4 +182,45 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+
+
+  ///  JOIN ROOM FUNCTION
+  void joinRoom(){
+    showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: Text('Enter Workspace ID :', style: TextStyle(fontSize: 20),),
+        content: TextField(
+          controller: joinRoomController,
+           decoration:  InputDecoration(
+            border: joinRoomBorder,
+            focusedBorder: joinRoomBorder,
+            // enabledBorder: joinRoomBorder,
+            hintText: "example@id",
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () {
+            Navigator.pop(context);
+          }, child: Text('Cancel')),
+          ElevatedButton(onPressed: () async{
+            final workspaceprovider = context.read<ActiveWorkspaceProvider>();
+            final success = await workspaceprovider.joinRoom(joinRoomController.text);
+            if(success){
+              // ignore: use_build_context_synchronously
+              Navigator.pop(context);
+              joinRoomController.clear();
+            }else{
+              joinRoomController.clear();
+            }
+
+          }, child: Text('Join'))
+        ],
+      );
+    });
+  }
+
+  final joinRoomBorder = OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.black)
+            );
 }

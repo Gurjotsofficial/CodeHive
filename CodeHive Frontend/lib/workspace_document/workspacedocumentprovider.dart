@@ -80,4 +80,44 @@ class WorkspaceDocumentProvider extends ChangeNotifier {
     return false;
   }
 }
+
+void swtichWorkspaceDocument(int index) {
+  if (index < 0 || index >= documents.length) {
+    debugPrint("Invalid index in switch: $index");
+    return;
+  }
+
+  activeDocument = documents[index];
+  notifyListeners();
+}
+
+
+Future<bool> deleteWorkspaceDocument(int index) async {
+  final docToDelete = documents[index];
+
+  final success = await WorkspaceDocumentsservices()
+      .deleteWorkspaceDocument(docToDelete.id);
+
+  if (!success) return false;
+
+  // Remove document first
+  documents.removeAt(index);
+
+  // Handle active document safely
+  if (activeDocument?.id == docToDelete.id) {
+    if (documents.isNotEmpty) {
+      if (index > 0) {
+        activeDocument = documents[index - 1];
+      } else {
+        activeDocument = documents[0];
+      }
+    } else {
+      activeDocument = null;
+    }
+  }
+
+  notifyListeners();
+  return true;
+}
+
 }

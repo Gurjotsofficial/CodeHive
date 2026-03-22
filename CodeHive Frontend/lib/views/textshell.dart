@@ -7,11 +7,10 @@ import 'package:collab_code_editor/workspace/activeworkspaceprovider.dart';
 import 'package:collab_code_editor/workspace_document/workspacedocumentprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:code_text_field/code_text_field.dart';
-// import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
 import 'package:provider/provider.dart';
 import 'package:highlight/languages/javascript.dart';
-// import 'package:flutter_highlight/themes/monokai-sublime.dart' as monokai;
+import 'package:flutter/services.dart';
 
 class TestWorkspaceshell extends StatefulWidget {
   const TestWorkspaceshell({super.key});
@@ -22,6 +21,8 @@ class TestWorkspaceshell extends StatefulWidget {
 
 class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
 
+  String? currentDocumentid;
+
   late CodeController codeController;
 
   TextEditingController inputController = TextEditingController();
@@ -30,6 +31,16 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
   late SocketService socketService;
 
   Timer? _debounce;
+
+  // Making Sidebar More Interactive
+  // Initializing a List of options in the sidebar
+  List<Map> sidebarOptions = [
+    {"Name": "Members", "Icon" : Icons.person},
+    {"Name" : "Documents" ,"Icon" : Icons.folder}
+  ];
+  // Creating a variable to Track the list
+  late int sidebarOptionsSelectedIndex;
+  late int sidebarOptionsSelectedPreviousIndex;
 
 
   @override
@@ -42,37 +53,39 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
         language: javascript,
       );
 
+      sidebarOptionsSelectedIndex = 0;
+      sidebarOptionsSelectedPreviousIndex = 0;
      
 
     socketService = SocketService();
     socketService.connect();
-
+    
     WidgetsBinding.instance.addPostFrameCallback((_) async {
 
       final workspaceProvider = context.read<ActiveWorkspaceProvider>();
       final documentProvider = context.read<WorkspaceDocumentProvider>();
       final presenceProvider = context.read<PresenceProvider>();
-      final userProvider = context.read<Userprovider>();
+      // final userProvider = context.read<Userprovider>();
 
       final workspaceId = workspaceProvider.activeWorkspace!.id;
 
       /// Fetch documents
       await documentProvider.fetchDocuments(workspaceId);
-      final activeDoc = documentProvider.activeDocument;
+      // final activeDoc = documentProvider.activeDocument;
 
       // initialising the editor areas content according to the active document
-      if (activeDoc != null) {
-        codeController.text = activeDoc.content;
-      }
+    //   if (activeDoc != null) {
+    //     codeController.text = activeDoc.content;
+    //   }
 
-      // Joining a room for the active document
-      if (activeDoc != null) {
-        final username = userProvider.currentUser!.name;
-        socketService.joinDocument(
-        activeDoc.id,
-        username,
-      );
-    }
+    //   // Joining a room for the active document
+    //   if (activeDoc != null) {
+    //     final username = userProvider.currentUser!.name;
+    //     socketService.joinDocument(
+    //     activeDoc.id,
+    //     username,
+    //   );
+    // }
 
       /// Listen for remote code updates
    socketService.listenCodeChange((content) {
@@ -87,6 +100,7 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
       text: content,
       selection: TextSelection.collapsed(offset: content.length),
     );
+    // codeController.text = content;
 
     documentProvider.updateLocalContent(content);
 
@@ -121,6 +135,21 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
 
     final activeWorkspaceProvider = context.watch<ActiveWorkspaceProvider>();
     final activeDocumentProvider = context.watch<WorkspaceDocumentProvider>();
+    // final workspaceDocProvider = context.read<WorkspaceDocumentProvider>();
+    final userProvider = context.read<Userprovider>();
+
+    if(activeDocumentProvider.activeDocument != null && currentDocumentid != activeDocumentProvider.activeDocument!.id && mounted){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    final activeDoc = activeDocumentProvider.activeDocument;
+        if(activeDoc != null){
+          if(currentDocumentid != activeDoc.id){
+            debugPrint('Calling Set Active Workspace Function');
+            setActiveWorkspace(activeDocumentProvider, userProvider);
+          }
+        }
+    });
+    }
+    
 
     if(activeDocumentProvider.isLoading == true){
       return const Scaffold(
@@ -164,10 +193,18 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
               },
               icon: const Icon(Icons.play_arrow, color: Colors.black),
             ),
-
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.swap_vert_circle_outlined,
+              onPressed: () {
+                showCreateDocumentDialog();
+              },
+              icon: const Icon(Icons.add_box_outlined,
+                  color: Colors.black),
+            ),
+            IconButton(
+              onPressed: () {
+                shareWorkspace();
+              },
+              icon: const Icon(Icons.share,
                   color: Colors.black),
             ),
 
@@ -198,29 +235,106 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
-                    "Members",
-                    style: TextStyle(fontSize: 18),
+                  // const Text(
+                  //   "Members",
+                  //   style: TextStyle(fontSize: 18),
+                  // ),
+                  Expanded(
+                    child: ListView.builder(
+                              itemCount: sidebarOptions.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    sidebarOptionsSelectedIndex = index;
+                                    setState(() {});
+                                  },
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 2),
+                                      child: Text(sidebarOptions[index]["Name"], style: TextStyle(fontSize: 18),)
+                                    ),
+                                        SizedBox(width: 5,),
+                                        Icon(sidebarOptions[index]["Icon"]),
+                                      ],
+                                  ),
+                                );
+                              }
+                              ),
                   ),
 
-                  Consumer<PresenceProvider>(
-                    builder: (context, presence, child) {
+                  Expanded(
+                    flex: 8,
+                    child: sidebarOptionsSelectedIndex == 0 ? Consumer<PresenceProvider>(
+                      builder: (context, presence, child) {
+                    
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            
+                            const SizedBox(height: 8),
+                            Text("Members :" , style: TextStyle(fontSize: 18),),
+                            ...presence.activeUsers.map(
+                                  (user) => Text(
+                                  "• $user",
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                            )
+                    
+                          ],
+                        );
+                      },
+                    ) : Consumer<WorkspaceDocumentProvider>(
+                      builder: (context, document, child) {
+                    
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            
+                            const SizedBox(height: 8),
+                            Text("Documents :", style: TextStyle(fontSize: 18),),
+                            ...document.documents.asMap().entries.map((entry) {
+                                    final document = entry.value;
+                                    final index = entry.key;
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-
-                          ...presence.activeUsers.map(
-                                (user) => Text(
-                                "• $user",
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                          )
-
-                        ],
-                      );
-                    },
+                                    return GestureDetector(
+                                    onTap: () {
+                                      switchDocument(index);
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        gradient: LinearGradient(colors: [const Color.fromARGB(255, 199, 180, 180), const Color.fromARGB(255, 150, 148, 150)] , tileMode: TileMode.clamp)
+                                      ),
+                                      // color: Colors.purple[200],
+                                      margin: EdgeInsets.symmetric(vertical: 2),
+                                      // padding: EdgeInsets.all(2),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                          // "• ${document.name}",
+                                          "  ${document.name}",
+                                          style: const TextStyle(fontSize: 16),
+                                              ),
+                                      
+                                          IconButton(onPressed: () async{
+                                            debugPrint(index.toString());
+                                            showDeleteDocumentDialogue(index);
+                                            setState(() {});
+                                          }, icon: Icon(Icons.delete, color: Colors.red[900],size: 22,))
+                                        ],
+                                      ),
+                                    ),
+                                  );}
+                            )
+                    
+                          ],
+                        );
+                      },
+                    ) ,
                   )
 
                 ],
@@ -328,7 +442,7 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
     );
   }
 
-
+/// METHODS
 /// EDITOR WIDGET
 Widget _buildEditor(WorkspaceDocumentProvider provider) {
 
@@ -376,4 +490,202 @@ Widget _buildEditor(WorkspaceDocumentProvider provider) {
 }
 
 
+
+
+
+
+
+
+/// SHOW DEBUG CONSOLE
+void showCreateDocumentDialog() {
+
+  showDialog(
+    context: context,
+    builder: (context) {
+
+      return AlertDialog(
+        title: const Text("Create New File"),
+
+        content: TextField(
+          controller: createDocumentNameController,
+          decoration: const InputDecoration(
+            hintText: "Enter file name",
+          ),
+        ),
+
+        actions: [
+
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
+          ),
+
+          ElevatedButton(
+            onPressed: () async {
+
+              final name = createDocumentNameController.text.trim();
+
+              if (name.isEmpty) return;
+
+              final workspaceId = context.read<ActiveWorkspaceProvider>().activeWorkspace!.id;
+              final workspaceDocumentProvider = context.read<WorkspaceDocumentProvider>();
+              final success = await workspaceDocumentProvider.createDocument(workspaceId, name);
+
+              if (success) {
+                createDocumentNameController.clear();
+                sidebarOptionsSelectedPreviousIndex = workspaceDocumentProvider.documents.length - 1;
+                // ignore: use_build_context_synchronously
+                Navigator.pop(context);
+              }
+
+            },
+            child: const Text("Create"),
+          ),
+
+        ],
+      );
+
+    },
+  );
+}
+
+void showDeleteDocumentDialogue(int index) async{
+  showDialog(
+    context: context,
+    builder: (context) {
+
+      return AlertDialog(
+        title: const Text("Are You Sure You Want To Delete This Document"),
+
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
+          ),
+
+          ElevatedButton(
+            onPressed: () async {
+
+              final workspaceDocumentProvider = context.read<WorkspaceDocumentProvider>();
+
+              final success = await workspaceDocumentProvider.deleteWorkspaceDocument(index);
+
+              if (success) {
+                if(sidebarOptionsSelectedPreviousIndex == index){
+                  final documents = workspaceDocumentProvider.documents;
+                if (documents.isNotEmpty) {
+                  if (index > 0) {
+                    sidebarOptionsSelectedPreviousIndex = index - 1;
+                  } else {
+                    sidebarOptionsSelectedPreviousIndex = 0;
+                  }
+                }
+                }
+                // ignore: use_build_context_synchronously
+                Navigator.pop(context);
+              }
+
+            },
+            child: const Text("Delete"),
+          ),
+
+        ],
+      );
+
+    },
+  );
+}
+
+
+/// SET ACTIVE WORKSPACE
+void setActiveWorkspace(WorkspaceDocumentProvider provider, Userprovider userProvider){
+  if(currentDocumentid != null){
+    socketService.leaveDocument(currentDocumentid!);
+    debugPrint('Left Previous Document');
+  }
+  if(provider.activeDocument != null){
+  final username = userProvider.currentUser!.name;
+  final activeDocId = provider.activeDocument!.id;
+  socketService.joinDocument(activeDocId, username);
+
+  debugPrint('Joined New Document');
+  debugPrint('Previous Index : ${sidebarOptionsSelectedPreviousIndex.toString()}');
+
+  currentDocumentid = activeDocId;
+  final content = provider.activeDocument!.content;
+
+  codeController.value = TextEditingValue(
+  text: content,
+  selection: TextSelection.collapsed(offset: content.length),
+);
+
+  debugPrint('Reset currentDocumentid and codeController.text');
+  debugPrint('New Document id : ${provider.activeDocument!.id} and name : ${provider.activeDocument!.name}');
+  debugPrint('content : ${provider.activeDocument!.content}');
+  }else{
+    codeController.clear();
+  }
+}
+ 
+
+ /// SWITCH WORKSPACE DOCUMENT FUNCTION
+ void switchDocument(int index){
+  final workspaceDocProvider = context.read<WorkspaceDocumentProvider>();
+
+  if(sidebarOptionsSelectedPreviousIndex >= 0 && sidebarOptionsSelectedPreviousIndex < workspaceDocProvider.documents.length)
+  {
+  if(workspaceDocProvider.documents[sidebarOptionsSelectedPreviousIndex].content != codeController.text){
+  workspaceDocProvider.documents[sidebarOptionsSelectedPreviousIndex].content = codeController.text;
+  debugPrint('Temporarily Updated Local Content');
+  }
+  }
+  workspaceDocProvider.swtichWorkspaceDocument(index);
+  sidebarOptionsSelectedPreviousIndex = index;
+ }
+
+
+ /// SHARE WORKSPACE
+ void shareWorkspace(){
+  final activeWorkspaceProvider = context.read<ActiveWorkspaceProvider>();
+  final roomID = activeWorkspaceProvider.activeWorkspace!.id;
+  showDialog(context: context, builder: (context) {
+    return AlertDialog(
+      title: Padding(
+        padding: const EdgeInsets.only(right: 38),
+        child: Text('Workspace ID :', style: TextStyle(fontSize: 20),),
+      ),
+      content: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.white54
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(roomID),
+            IconButton(onPressed: () {
+              Clipboard.setData(
+                ClipboardData(text: roomID)
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Copied to Clipboard', style: TextStyle(color: Colors.white),),
+                duration: Duration(seconds: 1),backgroundColor: Colors.red[200],)
+              );
+            }, icon: Icon(Icons.copy))
+          ],
+        ),
+      ),
+      actions: [
+        ElevatedButton(onPressed: () {
+          Navigator.pop(context);
+        }, child: Text('Close'))
+      ],
+    );
+  });
+ }
 }

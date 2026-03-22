@@ -83,6 +83,7 @@ io.on("connection", (socket) => {
 
         socket.on("leaveDocument", (documentId) => {
         socket.leave(documentId);
+        console.log(`User ${documentId} left the room`);
 
         if (documentUsers[documentId]) {
             documentUsers[documentId] = documentUsers[documentId].filter(user => user.socketId !== socket.id);

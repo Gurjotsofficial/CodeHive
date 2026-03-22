@@ -91,4 +91,52 @@ class Workspaceservices {
         return null;
     }
   }
+
+
+Future<WorkspaceModel?> joinRoomService(String workspaceId) async{
+    try {
+      final prefs = await SharedPreferences.getInstance();
+         String? token = prefs.getString(AuthServices.AUTHKEY);
+
+          if(token != null && token.isNotEmpty){
+              debugPrint('token found');
+              debugPrint('This is join room function');
+              // debugPrint("${AuthServices.AUTHKEY} = $token");
+
+              // here we store our response from the api hit in a response named varialbe
+              http.Response response = await http.get(Uri.parse("http://localhost:4000/api/v1/join_room/$workspaceId"),
+              headers: {
+                "Authorization" : "Bearer $token"
+              }
+              );
+              debugPrint(response.statusCode.toString());
+              
+              if(response.statusCode == 404){
+                debugPrint(response.body.toString());
+                return null;
+              }
+
+              if(response.statusCode == 200){
+                final data = jsonDecode(response.body);
+                final workspaceJson = data['workspace'];
+                
+
+                // why did we do this
+                final workspace = WorkspaceModel.fromJson(workspaceJson);
+                return workspace;
+              }
+                else{
+                return null;
+                }
+              }
+              else{
+                debugPrint('token not found');
+                return null;
+                } 
+    } catch (e) {
+        debugPrint(e.toString());
+        return null;
+    }
+  }
+
 }
