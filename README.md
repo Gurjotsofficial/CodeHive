@@ -6,14 +6,15 @@ CodeHive is a real-time collaborative code editor that allows multiple users to 
 
 ## 🧠 Features
 
-* 🧑‍💻 Real-time collaborative code editing + execution(multiple users)
-* 📡 Live code synchronization using sockets
-* 🗂️ Workspace creation and management
-* 📄 Document-based code editing
-* 🔐 User authentication system
-* ⚡ Fast and responsive UI built with Flutter
-* 🌐 Backend powered by Node.js and MongoDB
-
+- 🧑‍💻 Real-time collaborative coding
+- 📄 Create and delete documents
+- 🔗 Share coding rooms with others
+- 🚪 Join shared rooms
+- ▶️ Code execution support
+- 🗂️ Workspace management
+- 🔐 User authentication system
+- ⚡ Flutter-based responsive UI
+- 🌐 Node.js + MongoDB backend
 ---
 
 ## 🏗️ Project Structure
