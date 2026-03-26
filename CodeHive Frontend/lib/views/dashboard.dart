@@ -1,3 +1,5 @@
+import 'package:collab_code_editor/App_Theme/app_colors.dart';
+import 'package:collab_code_editor/utils/text_form_field.dart';
 import 'package:collab_code_editor/services/authprovider.dart';
 import 'package:collab_code_editor/user/userprovider.dart';
 import 'package:collab_code_editor/workspace/activeworkspaceprovider.dart';
@@ -26,29 +28,20 @@ class _DashboardState extends State<Dashboard> {
     final userprovider = context.watch<Userprovider>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      // appBar:  AppBar(
-      //     backgroundColor: const Color.fromARGB(255, 251, 161, 161),
-      //     title: Text("Collaborative Code Editor", style: TextStyle(
-      //       fontSize: 32,
-      //       color: Colors.black
-      //     ),
-      //     ),
-      //     centerTitle: true,
-      //   ),
+      backgroundColor: AppColors.background,
+      
     
       body: Row(
         children: [
            Container(
-            color: Colors.red[100],
+            color: AppColors.surface,
                 width: 250,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("WorkSpaces", style: TextStyle(fontSize: 20, color: Colors.black,)
-                      ),
+                      child: Text("WorkSpaces", style: Theme.of(context).textTheme.bodyLarge)
                     ),
                     Expanded(
                       child: ListView.separated(itemBuilder: (context, index){
@@ -63,10 +56,10 @@ class _DashboardState extends State<Dashboard> {
                             child: ListTile(
                               shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(14)),
                                 
-                              leading: Icon(Icons.sticky_note_2_outlined),
+                              leading: Icon(Icons.sticky_note_2_outlined, color: Theme.of(context).iconTheme.color,),
                                 
                               title: Text(workspaceprovider.currentWorkspaces[index].name, 
-                              style: TextStyle(color: Colors.black, fontSize: 12),
+                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white, fontSize: 14),
                               ),
 
                             ),
@@ -76,7 +69,7 @@ class _DashboardState extends State<Dashboard> {
                       itemCount: workspaceprovider.currentWorkspaces.length,
                       separatorBuilder: (context, index) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
-                        child: Divider(height: 5,thickness: 1,color: Colors.black,),
+                        child: Divider(height: 5,thickness: 1,color: const Color.fromARGB(255, 47, 53, 62)),
                       ),
                       ),
                     ),
@@ -88,10 +81,7 @@ class _DashboardState extends State<Dashboard> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Welcome to Collabrative Code Editor',
-                style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500
-                        ), 
+                style: Theme.of(context).textTheme.bodyLarge
                 ),
                 SizedBox(
                   height: 50,
@@ -105,6 +95,7 @@ class _DashboardState extends State<Dashboard> {
                             title: Text("Create Workspace"),
 
                             content: TextFormField(
+                              style: TextFormFieldBuilder().fieldTextStyle,
                               controller: workspaceNameController,
                               decoration: InputDecoration(
                                 hintText: "Workspace name",
@@ -190,11 +181,12 @@ class _DashboardState extends State<Dashboard> {
       return AlertDialog(
         title: Text('Enter Workspace ID :', style: TextStyle(fontSize: 20),),
         content: TextField(
+          style: TextFormFieldBuilder().fieldTextStyle,
           controller: joinRoomController,
            decoration:  InputDecoration(
-            border: joinRoomBorder,
-            focusedBorder: joinRoomBorder,
-            // enabledBorder: joinRoomBorder,
+            border: Theme.of(context).inputDecorationTheme.border,
+            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
+            enabledBorder: Theme.of(context).inputDecorationTheme.enabledBorder,
             hintText: "example@id",
           ),
         ),
@@ -219,8 +211,4 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  final joinRoomBorder = OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.black)
-            );
 }

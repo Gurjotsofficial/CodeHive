@@ -1,3 +1,4 @@
+import 'package:collab_code_editor/App_Theme/app_colors.dart';
 import 'package:collab_code_editor/execution/execution_provider.dart';
 import 'package:collab_code_editor/presence/presenceprovider.dart';
 import 'package:collab_code_editor/services/authprovider.dart';
@@ -37,10 +38,12 @@ class MyApp extends StatelessWidget {
       home: const LandingPage(),
 
 
-      theme: ThemeData(
-        useMaterial3: true,
+      theme: AppTheme.darkTheme
+      // theme: ThemeData(
+      //   useMaterial3: true,
+
+      // )
       )
-    ),
     );
       //   // This is the theme of your application.
       //   //

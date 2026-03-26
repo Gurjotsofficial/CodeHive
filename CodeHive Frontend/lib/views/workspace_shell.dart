@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:collab_code_editor/App_Theme/app_colors.dart';
+import 'package:collab_code_editor/utils/snackbar_builder.dart';
+import 'package:collab_code_editor/utils/text_form_field.dart';
 import 'package:collab_code_editor/execution/execution_provider.dart';
 import 'package:collab_code_editor/presence/presenceprovider.dart';
 import 'package:collab_code_editor/services/socket_services.dart';
@@ -12,14 +15,16 @@ import 'package:provider/provider.dart';
 import 'package:highlight/languages/javascript.dart';
 import 'package:flutter/services.dart';
 
-class TestWorkspaceshell extends StatefulWidget {
-  const TestWorkspaceshell({super.key});
+class Workspaceshell extends StatefulWidget {
+  const Workspaceshell({super.key});
 
   @override
-  State<TestWorkspaceshell> createState() => _TestWorkspaceshellState();
+  State<Workspaceshell> createState() => _WorkspaceshellState();
 }
 
-class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
+class _WorkspaceshellState extends State<Workspaceshell> {
+
+  FocusNode editorFocusNode = FocusNode();
 
   String? currentDocumentid;
 
@@ -61,6 +66,8 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
     socketService.connect();
     
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+
+      editorFocusNode.requestFocus();
 
       final workspaceProvider = context.read<ActiveWorkspaceProvider>();
       final documentProvider = context.read<WorkspaceDocumentProvider>();
@@ -162,14 +169,22 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.red[200],
+        centerTitle: false,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: AppColors.border,
+            ),
+            borderRadius: BorderRadiusGeometry.vertical(bottom: Radius.circular(12))
+          ),
+          backgroundColor: AppColors.surface,
           title: Text(
             activeWorkspaceProvider.activeWorkspace!.name,
-            style: const TextStyle(fontSize: 22, color: Colors.black),
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
           actions: [
 
             IconButton(
+              tooltip: "Save",
               onPressed: () {
                 if(activeDocumentProvider.activeDocument != null){
                   activeDocumentProvider.saveDocumentContent(
@@ -178,10 +193,11 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                   );
                 }
               },
-              icon: const Icon(Icons.save, color: Colors.black),
+              icon: const Icon(Icons.save,),
             ),
 
             IconButton(
+              tooltip: "Run",
               onPressed: () {
                 if(activeDocumentProvider.activeDocument != null){
 
@@ -191,31 +207,32 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                   context.read<ExecutionProvider>().runCode(code, input);
                 }
               },
-              icon: const Icon(Icons.play_arrow, color: Colors.black),
+              icon: const Icon(Icons.play_arrow,),
             ),
             IconButton(
+              tooltip: "Create File",
               onPressed: () {
                 showCreateDocumentDialog();
               },
-              icon: const Icon(Icons.add_box_outlined,
-                  color: Colors.black),
+              icon: const Icon(Icons.add_box_outlined),
             ),
             IconButton(
+              tooltip: "Share",
               onPressed: () {
                 shareWorkspace();
               },
-              icon: const Icon(Icons.share,
-                  color: Colors.black),
+              icon: const Icon(Icons.share),
             ),
 
             IconButton(
+              tooltip: "Close",
               onPressed: () {
                 activeWorkspaceProvider.clearActiveWorkspace();
                 activeDocumentProvider.cleanWorkspaceDocument();
                 context.read<ExecutionProvider>().clearExecution();
                 socketService.disconnect();
               },
-              icon: const Icon(Icons.close, color: Colors.black),
+              icon: const Icon(Icons.close),
             ),
 
           ],
@@ -229,7 +246,8 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
               width: 220,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.2),
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.border, width: 1.2),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,12 +270,12 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
+                                        Icon(sidebarOptions[index]["Icon"], color: AppColors.primaryVariant,),
+                                        SizedBox(width: 5,),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 2),
-                                      child: Text(sidebarOptions[index]["Name"], style: TextStyle(fontSize: 18),)
+                                      child: Text(sidebarOptions[index]["Name"], style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 18),)
                                     ),
-                                        SizedBox(width: 5,),
-                                        Icon(sidebarOptions[index]["Icon"]),
                                       ],
                                   ),
                                 );
@@ -275,12 +293,19 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                           children: [
                             
                             const SizedBox(height: 8),
-                            Text("Members :" , style: TextStyle(fontSize: 18),),
+                            Text("Members :" , style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: AppColors.textPrimary, fontSize: 16 
+                              ),),
                             ...presence.activeUsers.map(
-                                  (user) => Text(
-                                  "• $user",
-                                  style: const TextStyle(fontSize: 16),
-                                ),
+                                  (user) => Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                    "• $user",
+                                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                       color: AppColors.textPrimary, fontSize: 16 
+                                    ),
+                                     ),
+                                  ),
                             )
                     
                           ],
@@ -294,7 +319,9 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                           children: [
                             
                             const SizedBox(height: 8),
-                            Text("Documents :", style: TextStyle(fontSize: 18),),
+                            Text("Documents :", style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: AppColors.textPrimary, fontSize: 16 
+                              ),),
                             ...document.documents.asMap().entries.map((entry) {
                                     final document = entry.value;
                                     final index = entry.key;
@@ -306,7 +333,11 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                                     child: Container(
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(12),
-                                        gradient: LinearGradient(colors: [const Color.fromARGB(255, 199, 180, 180), const Color.fromARGB(255, 150, 148, 150)] , tileMode: TileMode.clamp)
+                                        shape: BoxShape.rectangle,
+                                        border: BoxBorder.all(
+                                          color: AppColors.border
+                                        )
+                                        // gradient: LinearGradient(colors: [const Color.fromARGB(255, 199, 180, 180), const Color.fromARGB(255, 150, 148, 150)] , tileMode: TileMode.clamp)
                                       ),
                                       // color: Colors.purple[200],
                                       margin: EdgeInsets.symmetric(vertical: 2),
@@ -317,7 +348,9 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                                           Text(
                                           // "• ${document.name}",
                                           "  ${document.name}",
-                                          style: const TextStyle(fontSize: 16),
+                                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                            color: AppColors.textPrimary, fontSize: 14 
+                                          ),
                                               ),
                                       
                                           IconButton(onPressed: () async{
@@ -351,16 +384,18 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                     flex: 7,
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(8),
+                      // padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         border:
-                        Border.all(color: Colors.black, width: 1.2),
+                        Border.all(color: AppColors.border, width: 1.2),
                       ),
                       child: activeDocumentProvider.activeDocument == null
-                          ? const Text(
-                        'No Document Exists in this Workspace',
-                        style: TextStyle(fontFamily: 'monospace'),
-                      )
+                          ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('No Document Exists in this Workspace',
+                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 16,fontFamily: 'monospace'),
+                                        ),
+                          )
                           : _buildEditor(activeDocumentProvider),
                     ),
                   ),
@@ -377,8 +412,9 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                             height: double.infinity,
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
+                              color: AppColors.surface,
                               border: Border.all(
-                                  color: Colors.black, width: 1.2),
+                                  color: AppColors.border, width: 1.2),
                             ),
                             child:
                                 // 
@@ -392,15 +428,16 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                                   if (execProvider.error.isNotEmpty) {
                                     return SingleChildScrollView(
                                       child: SelectableText(
-                                        execProvider.error,
-                                        style: TextStyle(color: Colors.red),
+                                        'Error :\n${execProvider.error}',
+                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red, fontSize: 16),
                                       ),
                                     );
                                   }
                                  if(execProvider.output.isNotEmpty){
-                                  return SingleChildScrollView(child: SelectableText(execProvider.output));
+                                  return SingleChildScrollView(child: SelectableText('Output :\n${execProvider.output}',
+                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppColors.textSecondary, fontSize: 16),),);
                                  } 
-                                 return SelectableText("Outputs Will Appear Here");
+                                 return SelectableText("Outputs Will Appear Here", style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 16,),);
                                 },
                               )
                           ),
@@ -409,20 +446,35 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
                         /// INPUT
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            // padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                  color: Colors.black, width: 1.2),
+                                  color: AppColors.border, width: 1.2),
                             ),
 
                             child: TextField(
+                              style: TextFormFieldBuilder().fieldTextStyle,
+                              textAlignVertical: TextAlignVertical.top,
                               controller: inputController,
                               maxLines: null,
                               expands: true,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.zero,
+                                  borderSide: const BorderSide(color: AppColors.border,width: 0.01),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.zero,
+                                  borderSide: const BorderSide(color: AppColors.border, width: 0.01),
+                                ),
+                                enabledBorder:OutlineInputBorder(
+                                  borderRadius: BorderRadius.zero,
+                                  borderSide: const BorderSide(color: AppColors.border, width: 0.01),
+                                ),
                                 helperStyle:
                                 TextStyle(fontFamily: 'monospace'),
                                 hintText: "Kindly Pass Your Input Here!",
+                                hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 16)
                               ),
                             ),
                           ),
@@ -446,47 +498,68 @@ class _TestWorkspaceshellState extends State<TestWorkspaceshell> {
 /// EDITOR WIDGET
 Widget _buildEditor(WorkspaceDocumentProvider provider) {
 
-   return CodeTheme(
-      data: CodeThemeData(styles: monokaiSublimeTheme),
-     child: CodeField(
-      controller: codeController,
-      expands: true,
-      padding: const EdgeInsets.all(12),
-     
-      textStyle: const TextStyle(
-        fontFamily: 'monospace',
-        fontSize: 14,
-        color: Colors.white,
+   return Theme(
+    data: Theme.of(context).copyWith(
+      inputDecorationTheme: const InputDecorationTheme(
+        // contentPadding: EdgeInsets.zero,
+        contentPadding: EdgeInsets.all(12),
+        filled: true,
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
       ),
-      lineNumberStyle: const LineNumberStyle(
-        width: 50,
-        textStyle: TextStyle(
-          color: Colors.grey,
-          fontSize: 13,
+    ),
+   child: CodeTheme(
+            data: CodeThemeData(styles: monokaiSublimeTheme),
+            child: CodeField(
+              
+            // padding: EdgeInsets.all(8), // this did not work
+            controller: codeController,
+            focusNode: editorFocusNode,
+            expands: true,
+            maxLines: null,
+            // padding: EdgeInsets.all(12),
+          cursorColor: AppColors.primary,
+          textStyle: const TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 14,
+            color: Colors.white,
+          ),
+        
+     
+        lineNumberStyle: const LineNumberStyle(
+          textAlign: TextAlign.left,
+          background: AppColors.surface,
+          width: 70,
+          textStyle: TextStyle(
+            color: Colors.grey,
+            fontSize: 14,
+          ),
+          margin: 0
         ),
-      ),
-      onChanged: (value) {
-     
-        provider.updateLocalContent(value);
-     
-        if (_debounce?.isActive ?? false) {
-          _debounce!.cancel();
-        }
-     
-        _debounce = Timer(const Duration(milliseconds: 200), () {
-     
-          final doc = provider.activeDocument;
-          if (doc == null) return;
-     
-          socketService.emitCodeChange(doc.id, value);
-     
-          debugPrint("Change Emitted");
-     
-        });
-     
-      },
-       ),
-   );
+        onChanged: (value) {
+       
+          provider.updateLocalContent(value);
+       
+          if (_debounce?.isActive ?? false) {
+            _debounce!.cancel();
+          }
+       
+          _debounce = Timer(const Duration(milliseconds: 200), () {
+       
+            final doc = provider.activeDocument;
+            if (doc == null) return;
+       
+            socketService.emitCodeChange(doc.id, value);
+       
+            debugPrint("Change Emitted");
+       
+          });
+       
+        },
+         ),
+    //  ),
+   ));
 }
 
 
@@ -507,6 +580,7 @@ void showCreateDocumentDialog() {
         title: const Text("Create New File"),
 
         content: TextField(
+          style: TextFormFieldBuilder().fieldTextStyle,
           controller: createDocumentNameController,
           decoration: const InputDecoration(
             hintText: "Enter file name",
@@ -557,7 +631,7 @@ void showDeleteDocumentDialogue(int index) async{
     builder: (context) {
 
       return AlertDialog(
-        title: const Text("Are You Sure You Want To Delete This Document"),
+        title:  Text("Are You Sure You Want To Delete This Document", style: Theme.of(context).textTheme.bodyMedium),
 
         actions: [
           TextButton(
@@ -662,21 +736,21 @@ void setActiveWorkspace(WorkspaceDocumentProvider provider, Userprovider userPro
         padding: EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: Colors.white54
+          border: Border.all(color: AppColors.border),
+          color: AppColors.surface
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(roomID),
+            Text(roomID, style: Theme.of(context).textTheme.bodyMedium,),
             IconButton(onPressed: () {
               Clipboard.setData(
                 ClipboardData(text: roomID)
               );
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Copied to Clipboard', style: TextStyle(color: Colors.white),),
-                duration: Duration(seconds: 1),backgroundColor: Colors.red[200],)
+                SnackbarBuilder().snackbarBuilder(content: 'Copied to Clipboard')
               );
-            }, icon: Icon(Icons.copy))
+            }, icon: Icon(Icons.copy, color: Theme.of(context).iconTheme.color,))
           ],
         ),
       ),

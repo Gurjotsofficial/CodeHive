@@ -1,12 +1,16 @@
-import 'package:collab_code_editor/components/text_form_field.dart';
+import 'package:collab_code_editor/App_Theme/app_colors.dart';
+import 'package:collab_code_editor/utils/snackbar_builder.dart';
+import 'package:collab_code_editor/utils/text_form_field.dart';
 import 'package:collab_code_editor/services/authprovider.dart';
 import 'package:collab_code_editor/user/userprovider.dart';
 import 'package:collab_code_editor/views/dashboard.dart';
-import 'package:collab_code_editor/views/textshell.dart';
+// import 'package:collab_code_editor/views/test_shell_2.dart';
+import 'package:collab_code_editor/views/workspace_shell.dart';
 // import 'package:collab_code_editor/views/workspaceshell.dart';
 import 'package:collab_code_editor/workspace/activeworkspaceprovider.dart';
 import 'package:collab_code_editor/workspace/workspaceprovider.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter_highlight/themes/dark.dart';
 import 'package:provider/provider.dart';
 
 class LandingPage extends StatefulWidget {
@@ -65,7 +69,8 @@ class _LandingPageState extends State<LandingPage> {
     return Consumer<AuthProvider>(builder: (context, auth, child){
       if (auth.isAuthenticated == null) {
 
-        return const Scaffold(
+        return Scaffold(
+          backgroundColor: AppColors.background,
       body: Center(
         child: CircularProgressIndicator(),
       )
@@ -77,21 +82,23 @@ class _LandingPageState extends State<LandingPage> {
           return const Dashboard();
         }
         else{
-          return const TestWorkspaceshell();
+          return const Workspaceshell();
         }
       });
       }
     else {
       return SafeArea(
       child:  Scaffold(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: AppColors.background,
         appBar:  AppBar(
-          // backgroundColor: const Color.fromARGB(255, 251, 161, 161),
-          backgroundColor: Colors.red[200],
-          title: Text("Collaborative Code Editor", style: TextStyle(
-            fontSize: 32,
-            color: Colors.black
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: AppColors.border,
+            ),
+            borderRadius: BorderRadiusGeometry.vertical(bottom: Radius.circular(12))
           ),
+          backgroundColor: AppColors.surface,
+          title: Text("Collaborative Code Editor", style: Theme.of(context).textTheme.headlineLarge
           ),
           centerTitle: true,
         ),
@@ -103,9 +110,7 @@ class _LandingPageState extends State<LandingPage> {
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Text("Collaborative code editing built for learning and teamwork.",
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 0, 0, 0), fontSize: 22
-                  ),
+                style: Theme.of(context).textTheme.bodyLarge
                   ),
               ),
               Center(
@@ -114,10 +119,7 @@ class _LandingPageState extends State<LandingPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text("A simple collaborative code editor \ndesigned for students and learners \nto practice coding together, \ndiscuss solutions, and build projects \nas a team.", 
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium
                     ),
 
                       Form(
@@ -126,7 +128,7 @@ class _LandingPageState extends State<LandingPage> {
                           margin: EdgeInsets.symmetric(vertical: 30),
                           elevation: 8,
                           shadowColor: const Color.fromARGB(255, 0, 0, 0),
-                          color:  Colors.red[200],
+                          color:  AppColors.surface,
                           // color: const Color.fromARGB(255, 251, 161, 161),
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 50, vertical: authMode == 0? 120: 50),
@@ -188,36 +190,17 @@ class _LandingPageState extends State<LandingPage> {
                                           if(authEmailController.text.trim().isEmpty || authPasswordController.text.trim().isEmpty)
                                           {
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text("Please fill both the details", style: TextStyle(color: Colors.black) ),
-                                                backgroundColor: Colors.red[200],
-                                                duration : Duration(seconds: 2),
-                                                ),
+                                              SnackbarBuilder().snackbarBuilder(content: "Please fill both the details")
                                             );
                                           }else if(!authEmailController.text.contains('@') || !authEmailController.text.contains('.'))
                                           {
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text("Please Enter a Valid email", style: TextStyle(color: Colors.black)),
-                                                backgroundColor: Colors.red[200],
-                                                duration : Duration(seconds: 2),
-                                                ),
+                                              SnackbarBuilder().snackbarBuilder(content: "Please Enter a Valid email")
                                             );
                                           }else {
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text("Login in Process", style: TextStyle(color: Colors.black)),
-                                                backgroundColor: Colors.green[200],
-                                                duration : Duration(seconds: 2),
-                                                      
-                                                ),
+                                              SnackbarBuilder().snackbarBuilder(content: "Login in Process")
                                             );
-                                                // Navigator.of(context).pushAndRemoveUntil(
-                                                //   MaterialPageRoute(
-                                                //     builder: (context) => Dashboard(),
-                                                //   ),
-                                                //     (routes) => false,
-                                                // );
                                                 if(authFormKey.currentState!.validate()){
                                                   final success = await auth.login(
                                                   authEmailController.text,
@@ -253,35 +236,19 @@ class _LandingPageState extends State<LandingPage> {
                                            }else if(authMode == 1){
                                             if( authNameController.text.trim().isEmpty || authEmailController.text.trim().isEmpty || authPasswordController.text.trim().isEmpty || authConfirmPasswordController.text.trim().isEmpty){
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text("Please fill all the details!", style: TextStyle(color: Colors.black) ),
-                                                backgroundColor: Colors.red[200],
-                                                duration : Duration(seconds: 2),
-                                              )
+                                              SnackbarBuilder().snackbarBuilder(content: "Please fill all the details!")
                                             );
                                           }else if(!authEmailController.text.contains('@') || !authEmailController.text.contains('.')){
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text("Please Enter a Valid email!", style: TextStyle(color: Colors.black)),
-                                                backgroundColor: Colors.red[200],
-                                                duration : Duration(seconds: 2),
-                                                ),
+                                              SnackbarBuilder().snackbarBuilder(content: "Please Enter a Valid email!")
                                             );
                                           }else if(authPasswordController.text != authConfirmPasswordController.text){
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text("Please Enter same password in both fields!", style: TextStyle(color: Colors.black)),
-                                                backgroundColor: Colors.red[200],
-                                                duration : Duration(seconds: 2),
-                                                ),
+                                              SnackbarBuilder().snackbarBuilder(content: "Please Enter same password in both fields!")
                                             );
                                           }else{
                                              ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text("Account Successfully Created!", style: TextStyle(color: Colors.black)),
-                                                backgroundColor: Colors.green[200],
-                                                duration : Duration(seconds: 2),
-                                                ),
+                                              SnackbarBuilder().snackbarBuilder(content: "Account Successfully Created!")
                                             );
                                                 //  Navigator.of(context).pushAndRemoveUntil(
                                                 //   MaterialPageRoute(
@@ -314,10 +281,12 @@ class _LandingPageState extends State<LandingPage> {
                                                 }
                                             }
                                            }
+                                        ElevatedButtonThemeData();
                                           }, child: Text("Sign Up",
-                                        style: TextStyle(
-                                          fontSize: 14
-                                        ),
+                                        // style: TextStyle(
+                                        //   fontSize: 14
+                                        // ),
+                                        
                                         ),
                                         ),
                                       ],
