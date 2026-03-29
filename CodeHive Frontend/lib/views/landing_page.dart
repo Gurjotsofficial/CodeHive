@@ -149,16 +149,16 @@ class _LandingPageState extends State<LandingPage> {
                                             child: Stack(
                                             alignment: Alignment.center,
                                             children: [
-                                                // Glow layer
-                                                Text(
-                                                  "CodeHive",
-                                                  style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                                                        fontSize: isMobile? 28 : 42,
-                                                        fontWeight: FontWeight.w700,
-                                                        // ignore: deprecated_member_use
-                                                        color: AppColors.primary.withOpacity(0.3),
-                                                      ),
-                                                ),
+                                                // // Glow layer
+                                                // Text(
+                                                //   "CodeHive",
+                                                //   style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                                                //         fontSize: isMobile? 28 : 42,
+                                                //         fontWeight: FontWeight.w700,
+                                                //         // ignore: deprecated_member_use
+                                                //         color: AppColors.primary.withOpacity(0.3),
+                                                //       ),
+                                                // ),
                         
                                                 // Gradient text
                                                 ShaderMask(
@@ -216,7 +216,7 @@ class _LandingPageState extends State<LandingPage> {
                                             duration: Duration(milliseconds: 300),
                                             curve: Curves.easeInOut,
                                             child: Container(
-                                            margin: const EdgeInsets.symmetric(vertical: 30),
+                                            margin: const EdgeInsets.symmetric(vertical: 30, ),
                                             decoration: BoxDecoration(
                                               // ignore: deprecated_member_use
                                               color: AppColors.surface.withOpacity(0.4), // subtle glass effect

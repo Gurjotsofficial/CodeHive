@@ -43,8 +43,15 @@ class _DashboardState extends State<Dashboard> {
                   Align(
                     alignment: Alignment.topLeft,
                     child: IconButton(
+                      hoverColor: Colors.transparent,
                       tooltip: 'Open Sidebar',
-                      icon: Icon(Icons.menu),
+                      icon: Image.asset(
+                        'assets/images/codehive_logo.png',
+                          // height: 46,
+                          // width: 46,
+
+                          scale: 15.5,
+                      ),
                       onPressed: () {
                         setState(() => isSideBarOpen = true);
                       },

@@ -36,6 +36,8 @@ class _WorkspaceshellState extends State<Workspaceshell> {
 
   late SocketService socketService;
 
+  bool isDrawerOpen = true;
+
   Timer? _debounce;
 
   // Making Sidebar More Interactive
@@ -171,6 +173,15 @@ class _WorkspaceshellState extends State<Workspaceshell> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          leading: MediaQuery.of(context).size.width < 800
+          ? IconButton(
+            tooltip: isDrawerOpen? 'Close Sidebar' : 'Open Sidebar',
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                setState(() => isDrawerOpen = true);
+              },
+            )
+          : null,
         centerTitle: false,
           shape: RoundedRectangleBorder(
             side: BorderSide(
@@ -240,27 +251,33 @@ class _WorkspaceshellState extends State<Workspaceshell> {
           ],
         ),
 
-        body: Row(
+        body: LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+
+        return Stack(
           children: [
 
-            /// LEFT SIDEBAR
-            Container(
-              width: 220,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.border, width: 1.2),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            /// 🔹 MAIN LAYOUT (YOUR ORIGINAL CODE, JUST SLIGHTLY WRAPPED)
+            Positioned.fill(
+              child: Row(
                 children: [
 
-                  // const Text(
-                  //   "Members",
-                  //   style: TextStyle(fontSize: 18),
-                  // ),
-                  Expanded(
-                    child: ListView.builder(
+                  /// 🔥 SIDEBAR (ONLY DESKTOP)
+                  if (!isMobile)
+                    Container(
+                      width: 220,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        border: Border.all(color: AppColors.border, width: 1.2),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          Expanded(
+                            child: ListView.builder(
                               itemCount: sidebarOptions.length,
                               itemBuilder: (context, index) {
                                 return GestureDetector(
@@ -268,215 +285,368 @@ class _WorkspaceshellState extends State<Workspaceshell> {
                                     sidebarOptionsSelectedIndex = index;
                                     setState(() {});
                                   },
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Icon(sidebarOptions[index]["Icon"], color: AppColors.primaryVariant,),
-                                        SizedBox(width: 5,),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2),
-                                      child: Text(sidebarOptions[index]["Name"], style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 18),)
-                                    ),
-                                      ],
+                                  child: Row(
+                                    children: [
+                                      Icon(sidebarOptions[index]["Icon"],
+                                          color: AppColors.primaryVariant),
+                                      SizedBox(width: 5),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 2),
+                                        child: Text(
+                                          sidebarOptions[index]["Name"],
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(fontSize: 18),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 );
-                              }
-                              ),
-                  ),
-
-                  Expanded(
-                    flex: 8,
-                    child: sidebarOptionsSelectedIndex == 0 ? Consumer<PresenceProvider>(
-                      builder: (context, presence, child) {
-                    
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            
-                            const SizedBox(height: 8),
-                            Text("Members :" , style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: AppColors.textPrimary, fontSize: 16 
-                              ),),
-                            ...presence.activeUsers.map(
-                                  (user) => Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                    "• $user",
-                                    // style: TextStyle(color: AppColors.textPrimary),
-                                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                       color: Colors.white, fontSize: 16 
-                                    ),
-                                     ),
-                                  ),
-                            )
-                    
-                          ],
-                        );
-                      },
-                    ) : Consumer<WorkspaceDocumentProvider>(
-                      builder: (context, document, child) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-
-                            Text(
-                              "Documents :",
-                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 16,
-                                  ),
+                              },
                             ),
+                          ),
 
-                            const SizedBox(height: 8),
+                          Expanded(
+                            flex: 8,
+                            child: sidebarOptionsSelectedIndex == 0
+                                ? Consumer<PresenceProvider>(
+                                    builder: (context, presence, child) {
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 8),
+                                          Text("Members :" , style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                            color: AppColors.textPrimary, fontSize: 16 
+                                            ),),
+                                          ...presence.activeUsers.map(
+                                            (user) => Padding(
+                                              padding: const EdgeInsets.only(top: 4),
+                                              child: Text("• $user",
+                                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                              color: Colors.white, fontSize: 16 
+                                              )
+                                            ),
+                                          )
+                                      ),
+                                      ],
+                                      );
+                                    },
+                                  )
+                                : Consumer<WorkspaceDocumentProvider>(
+                                    builder: (context, document, child) {
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            "Documents :",
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                                  color: AppColors.textPrimary,
+                                                  fontSize: 16,
+                                                ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Expanded(
+                                            child: ListView.builder(
+                                              itemCount: document.documents.length,
+                                              itemBuilder: (context, index) {
+                                                final doc = document.documents[index];
+                                                final isSelected =
+                                                    document.activeDocument?.id == doc.id;
 
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: document.documents.length,
-                                itemBuilder: (context, index) {
-                                  final doc = document.documents[index];
-                                  final isSelected =
-                                      document.activeDocument?.id == doc.id;
-
-                                  return _DocumentTile(
-                                    name: doc.name,
-                                    isSelected: isSelected,
-                                    onTap: () => switchDocument(index),
-                                    onDelete: () => showDeleteDocumentDialogue(index),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    )
-                  )
-
-                ],
-              ),
-            ),
-
-            /// MAIN AREA
-            Expanded(
-              child: Column(
-                children: [
-
-                  /// EDITOR
-                  Expanded(
-                    flex: 7,
-                    child: Container(
-                      width: double.infinity,
-                      // padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border:
-                        Border.all(color: AppColors.border, width: 1.2),
+                                                return _DocumentTile(
+                                                  name: doc.name,
+                                                  isSelected: isSelected,
+                                                  onTap: () => switchDocument(index),
+                                                  onDelete: () =>
+                                                      showDeleteDocumentDialogue(index),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
                       ),
-                      child: activeDocumentProvider.activeDocument == null
-                          ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text('Create a file and start coding',
-                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 16,fontFamily: 'monospace'),
-                                        ),
-                          )
-                          : _buildEditor(activeDocumentProvider),
                     ),
-                  ),
 
-                  /// INPUT + OUTPUT
+                  /// 🔹 MAIN AREA (UNCHANGED)
                   Expanded(
-                    flex: 3,
-                    child: Row(
+                    child: Column(
                       children: [
 
-                        /// OUTPUT
+                        /// EDITOR
                         Expanded(
+                          flex: 7,
                           child: Container(
-                            height: double.infinity,
-                            padding: const EdgeInsets.all(8),
+                            width: double.infinity,
                             decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              border: Border.all(
-                                  color: AppColors.border, width: 1.2),
+                              border: Border.all(color: AppColors.border, width: 1.2),
                             ),
-                            child:
-                                // 
-                                Consumer<ExecutionProvider>(
-                                builder: (context, execProvider, _) {
+                            child: activeDocumentProvider.activeDocument == null
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Create a file and start coding',
+                                    ),
+                                  )
+                                : _buildEditor(activeDocumentProvider),
+                          ),
+                        ),
 
-                                  if (execProvider.isExecuting) {
-                                    return Center(child: CircularProgressIndicator());
-                                  }
+                        /// INPUT + OUTPUT
+                        Expanded(
+                          flex: 3,
+                          child: Row(
+                            children: [
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                children: [
+                                    /// OUTPUT
+                                    Expanded(
+                                      child: Container(
+                                        height: double.infinity,
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.surface,
+                                          border: Border.all(color: AppColors.border, width: 1.2),
+                                        ),
+                                        child: Consumer<ExecutionProvider>(
+                                          builder: (context, execProvider, _) {
 
-                                  if (execProvider.error.isNotEmpty) {
-                                    return SingleChildScrollView(
-                                      child: SelectableText(
-                                        'Error :\n${execProvider.error}',
-                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red, fontSize: 16),
+                                            if (execProvider.isExecuting) {
+                                              return Center(child: CircularProgressIndicator());
+                                            }
+
+                                            if (execProvider.error.isNotEmpty) {
+                                              return SingleChildScrollView(
+                                                child: SelectableText(
+                                                  'Error :\n${execProvider.error}',
+                                                  style: Theme.of(context).textTheme.bodyMedium!
+                                                      .copyWith(color: Colors.red, fontSize: 16),
+                                                ),
+                                              );
+                                            }
+
+                                            if (execProvider.output.isNotEmpty) {
+                                              return SingleChildScrollView(
+                                                child: SelectableText(
+                                                  'Output :\n${execProvider.output}',
+                                                  style: Theme.of(context).textTheme.bodyMedium!
+                                                      .copyWith(color: AppColors.textSecondary, fontSize: 16),
+                                                ),
+                                              );
+                                            }
+
+                                            return SelectableText(
+                                              "Outputs Will Appear Here",
+                                              style: Theme.of(context).textTheme.bodyMedium!
+                                                  .copyWith(fontSize: 16),
+                                            );
+                                          },
+                                        ),
                                       ),
-                                    );
-                                  }
-                                 if(execProvider.output.isNotEmpty){
-                                  return SingleChildScrollView(child: SelectableText('Output :\n${execProvider.output}',
-                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppColors.textSecondary, fontSize: 16),),);
-                                 } 
-                                 return SelectableText("Outputs Will Appear Here", style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 16,),);
-                                },
-                              )
-                          ),
-                        ),
+                                    ),
 
-                        /// INPUT
-                        Expanded(
-                          child: Container(
-                            // padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: AppColors.border, width: 1.2),
-                            ),
-
-                            child: TextField(
-                              style: TextFormFieldBuilder().fieldTextStyle,
-                              textAlignVertical: TextAlignVertical.top,
-                              controller: inputController,
-                              maxLines: null,
-                              expands: true,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.zero,
-                                  borderSide: const BorderSide(color: AppColors.border,width: 0.01),
+                                    /// INPUT
+                                    Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: AppColors.border, width: 1.2),
+                                        ),
+                                        child: TextField(
+                                          style: TextFormFieldBuilder().fieldTextStyle,
+                                          textAlignVertical: TextAlignVertical.top,
+                                          controller: inputController,
+                                          maxLines: null,
+                                          expands: true,
+                                          decoration: InputDecoration(
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.zero,
+                                              borderSide: BorderSide(color: AppColors.border, width: 0.01),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.zero,
+                                              borderSide: BorderSide(color: AppColors.border, width: 0.01),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.zero,
+                                              borderSide: BorderSide(color: AppColors.border, width: 0.01),
+                                            ),
+                                            hintText: "Kindly Pass Your Input Here!",
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.zero,
-                                  borderSide: const BorderSide(color: AppColors.border, width: 0.01),
-                                ),
-                                enabledBorder:OutlineInputBorder(
-                                  borderRadius: BorderRadius.zero,
-                                  borderSide: const BorderSide(color: AppColors.border, width: 0.01),
-                                ),
-                                helperStyle:
-                                TextStyle(fontFamily: 'monospace'),
-                                hintText: "Kindly Pass Your Input Here!",
-                                hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 16)
                               ),
-                            ),
+                            ],
                           ),
                         ),
-
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),
 
+            /// 🔥 OVERLAY
+            if (isMobile && isDrawerOpen)
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () => setState(() => isDrawerOpen = false),
+                  child: Container(
+                    // ignore: deprecated_member_use
+                    color: Colors.black.withOpacity(0.3),
+                  ),
+                ),
+              ),
+
+            /// 🔥 FLOATING DRAWER (ONLY MOBILE)
+            if (isMobile)
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 250),
+                left: isDrawerOpen ? 0 : -240,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 220,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    border: Border.all(color: AppColors.border, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        // ignore: deprecated_member_use
+                        color: Colors.black.withOpacity(0.4),
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                      /// 🔥 SAME SIDEBAR CONTENT (COPY PASTED, NO CHANGE)
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: sidebarOptions.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                sidebarOptionsSelectedIndex = index;
+                                setState(() {});
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(sidebarOptions[index]["Icon"],
+                                      color: AppColors.primaryVariant),
+                                  SizedBox(width: 5),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 2),
+                                    child: Text(
+                                      sidebarOptions[index]["Name"],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .copyWith(fontSize: 18),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      Expanded(
+                        flex: 8,
+                        child: sidebarOptionsSelectedIndex == 0
+                            ? Consumer<PresenceProvider>(
+                                builder: (context, presence, child) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(height: 8),
+                                      Text("Members :" , style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                            color: AppColors.textPrimary, fontSize: 16 
+                                            ),),
+                                      ...presence.activeUsers.map(
+                                        (user) => Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Text("• $user",
+                                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                              color: Colors.white, fontSize: 16 
+                                              )
+                                        ),
+                                      )
+                                  )],
+                                  );
+                                },
+                              )
+                            : Consumer<WorkspaceDocumentProvider>(
+                                builder: (context, document, child) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(height: 8),
+                                      Text( 
+                                            "Documents :",
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                                  color: AppColors.textPrimary,
+                                                  fontSize: 16,
+                                                ),
+                                          ),
+                                      const SizedBox(height: 8),
+                                      Expanded(
+                                        child: ListView.builder(
+                                          itemCount: document.documents.length,
+                                          itemBuilder: (context, index) {
+                                            final doc = document.documents[index];
+                                            final isSelected =
+                                                document.activeDocument?.id == doc.id;
+
+                                            return _DocumentTile(
+                                              name: doc.name,
+                                              isSelected: isSelected,
+                                              onTap: () {
+                                                switchDocument(index);
+                                                setState(() => isDrawerOpen = false);
+                                              },
+                                              onDelete: () =>
+                                                  showDeleteDocumentDialogue(index),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            
           ],
-        ),
+        );
+      },
+    ),
       ),
     );
   }
+
+
+
+
 
 /// METHODS
 /// EDITOR WIDGET
@@ -713,43 +883,66 @@ void setActiveWorkspace(WorkspaceDocumentProvider provider, Userprovider userPro
   final activeWorkspaceProvider = context.read<ActiveWorkspaceProvider>();
   final roomID = activeWorkspaceProvider.activeWorkspace!.id;
   showDialog(context: context, builder: (context) {
-    return AlertDialog(
-      title: Padding(
-        padding: const EdgeInsets.only(right: 38),
-        child: Text('Workspace ID :', 
-        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-          color: AppColors.textPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+      final isMobile = constraints.maxWidth < 450;
+      return AlertDialog(
+        title: Padding(
+          padding: const EdgeInsets.only(right: 38),
+          child: Text('Workspace ID :', 
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            color: AppColors.textPrimary,
+          ),
+          ),
         ),
+        content: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.border),
+            color: AppColors.surface
+          ),
+          child: Wrap(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(roomID, style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),maxLines: 2,),
+              ),
+              if(!isMobile)
+              IconButton(onPressed: () {
+                Clipboard.setData(
+                  ClipboardData(text: roomID)
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackbarBuilder().snackbarBuilder(content: 'Copied to Clipboard')
+                );
+              }, icon: Icon(Icons.copy, color: AppColors.textPrimary,))
+            ],
+          ),
         ),
-      ),
-      content: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.border),
-          color: AppColors.surface
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(roomID, style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),),
-            IconButton(onPressed: () {
-              Clipboard.setData(
-                ClipboardData(text: roomID)
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackbarBuilder().snackbarBuilder(content: 'Copied to Clipboard')
-              );
-            }, icon: Icon(Icons.copy, color: AppColors.textPrimary,))
-          ],
-        ),
-      ),
-      actions: [
-        ElevatedButton(onPressed: () {
-          Navigator.pop(context);
-        }, child: Text('Close'))
-      ],
-    );
+        actions: [
+          if(!isMobile)
+          ElevatedButton(onPressed: () {
+            Navigator.pop(context);
+          }, child: Text('Close')),
+          if(isMobile)
+          ...[
+            TextButton(onPressed: () {
+            Navigator.pop(context);
+          }, child: Text('Close')),
+          ElevatedButton(onPressed: () {
+            Clipboard.setData(
+                  ClipboardData(text: roomID)
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackbarBuilder().snackbarBuilder(content: 'Copied to Clipboard')
+                );
+          }, child: Text('Copy'))]
+      
+        ],
+      );
+  });
   });
  }
 
