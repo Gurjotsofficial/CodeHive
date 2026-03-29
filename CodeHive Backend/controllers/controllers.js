@@ -51,7 +51,7 @@ exports.signUp = async(req , res) => {
             id : user._id
         };
         const token = await jwt.sign(payload, process.env.JWT_SECRET,{
-            expiresIn : "2h"
+            expiresIn : "3h"
         });
 
         user.token = token;
@@ -110,7 +110,7 @@ exports.login = async(req,res) => {
 
         if(doesPasswordMatch){
              const token = jwt.sign(payload, process.env.JWT_SECRET,{
-                expiresIn : "2h"
+                expiresIn : "3h"
              })
              existingUser.token = token;
              existingUser.password = undefined;

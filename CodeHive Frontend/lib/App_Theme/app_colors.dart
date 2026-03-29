@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   static const Color background = Color(0xFF0D1117);
@@ -70,11 +71,12 @@ class AppTheme {
 
         overlayColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.hovered)) {
-            return AppColors.primary.withValues(alpha: 0.1);
+            // ignore: deprecated_member_use
+            return AppColors.accent.withOpacity(0.1);
           }
           if (states.contains(WidgetState.pressed)) {
             // ignore: deprecated_member_use
-            return AppColors.primary.withValues(alpha: 0.2);
+            return AppColors.accent.withOpacity(0.2);
           }
           return null;
         }),
@@ -87,7 +89,7 @@ class AppTheme {
       ),
     ),
     // Text Theme
-    textTheme: const TextTheme(
+    textTheme: GoogleFonts.interTextTheme().copyWith(
       headlineLarge: TextStyle(
         color: AppColors.textPrimary,
         fontWeight: FontWeight.w300,

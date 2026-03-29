@@ -1,5 +1,6 @@
 import 'package:collab_code_editor/App_Theme/app_colors.dart';
 import 'package:flutter/material.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 class SnackbarBuilder {
 
@@ -7,12 +8,15 @@ class SnackbarBuilder {
     required String content,
   }){
     return SnackBar(content: Text(content,
-    style: TextStyle(color: AppTheme.darkTheme.textTheme.bodyLarge!.color,
-    fontSize: 14
-    ),),
-                    backgroundColor: AppColors.snackbar,
-                    duration : Duration(seconds: 2),
-              );
+    style: AppTheme.darkTheme.textTheme.bodyMedium!.copyWith(
+      color: AppColors.textPrimary,
+      fontSize: 14
+    )
+    ),
+
+    backgroundColor: AppColors.snackbar,
+    duration : Duration(seconds: 2),
+    );
   }
 
 

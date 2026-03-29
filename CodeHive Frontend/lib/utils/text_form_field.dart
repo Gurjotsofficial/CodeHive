@@ -11,7 +11,7 @@ class TextFormFieldBuilder {
   {
    return  SizedBox(
             width: 320,
-            height: 75,
+            height: 65,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -21,7 +21,7 @@ class TextFormFieldBuilder {
                     // obscureText: true,
                       decoration: InputDecoration(
                       // filled: true,
-                      // fillColor: Colors.white,
+                      fillColor: Colors.transparent,
                       hintText: hinttext,
                       hintStyle: TextStyle(
                         color: AppColors.textMuted,

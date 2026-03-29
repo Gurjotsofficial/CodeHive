@@ -11,6 +11,7 @@ import 'package:collab_code_editor/workspace_document/workspacedocumentprovider.
 import 'package:flutter/material.dart';
 import 'package:code_text_field/code_text_field.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:highlight/languages/javascript.dart';
 import 'package:flutter/services.dart';
@@ -145,7 +146,8 @@ class _WorkspaceshellState extends State<Workspaceshell> {
     // final workspaceDocProvider = context.read<WorkspaceDocumentProvider>();
     final userProvider = context.read<Userprovider>();
 
-    if(activeDocumentProvider.activeDocument != null && currentDocumentid != activeDocumentProvider.activeDocument!.id && mounted){
+    // if(activeDocumentProvider.activeDocument != null && currentDocumentid != activeDocumentProvider.activeDocument!.id && mounted){
+    if(activeDocumentProvider.activeDocument != null && currentDocumentid != activeDocumentProvider.activeDocument!.id){
     WidgetsBinding.instance.addPostFrameCallback((_) {
     final activeDoc = activeDocumentProvider.activeDocument;
         if(activeDoc != null){
@@ -179,7 +181,7 @@ class _WorkspaceshellState extends State<Workspaceshell> {
           backgroundColor: AppColors.surface,
           title: Text(
             activeWorkspaceProvider.activeWorkspace!.name,
-            style: Theme.of(context).textTheme.headlineLarge,
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
           actions: [
 
@@ -301,8 +303,9 @@ class _WorkspaceshellState extends State<Workspaceshell> {
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Text(
                                     "• $user",
+                                    // style: TextStyle(color: AppColors.textPrimary),
                                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                       color: AppColors.textPrimary, fontSize: 16 
+                                       color: Colors.white, fontSize: 16 
                                     ),
                                      ),
                                   ),
@@ -313,61 +316,42 @@ class _WorkspaceshellState extends State<Workspaceshell> {
                       },
                     ) : Consumer<WorkspaceDocumentProvider>(
                       builder: (context, document, child) {
-                    
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            
                             const SizedBox(height: 8),
-                            Text("Documents :", style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: AppColors.textPrimary, fontSize: 16 
-                              ),),
-                            ...document.documents.asMap().entries.map((entry) {
-                                    final document = entry.value;
-                                    final index = entry.key;
 
-                                    return GestureDetector(
-                                    onTap: () {
-                                      switchDocument(index);
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        shape: BoxShape.rectangle,
-                                        border: BoxBorder.all(
-                                          color: AppColors.border
-                                        )
-                                        // gradient: LinearGradient(colors: [const Color.fromARGB(255, 199, 180, 180), const Color.fromARGB(255, 150, 148, 150)] , tileMode: TileMode.clamp)
-                                      ),
-                                      // color: Colors.purple[200],
-                                      margin: EdgeInsets.symmetric(vertical: 2),
-                                      // padding: EdgeInsets.all(2),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                          // "• ${document.name}",
-                                          "  ${document.name}",
-                                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                            color: AppColors.textPrimary, fontSize: 14 
-                                          ),
-                                              ),
-                                      
-                                          IconButton(onPressed: () async{
-                                            debugPrint(index.toString());
-                                            showDeleteDocumentDialogue(index);
-                                            setState(() {});
-                                          }, icon: Icon(Icons.delete, color: Colors.red[900],size: 22,))
-                                        ],
-                                      ),
-                                    ),
-                                  );}
-                            )
-                    
+                            Text(
+                              "Documents :",
+                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 16,
+                                  ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: document.documents.length,
+                                itemBuilder: (context, index) {
+                                  final doc = document.documents[index];
+                                  final isSelected =
+                                      document.activeDocument?.id == doc.id;
+
+                                  return _DocumentTile(
+                                    name: doc.name,
+                                    isSelected: isSelected,
+                                    onTap: () => switchDocument(index),
+                                    onDelete: () => showDeleteDocumentDialogue(index),
+                                  );
+                                },
+                              ),
+                            ),
                           ],
                         );
                       },
-                    ) ,
+                    )
                   )
 
                 ],
@@ -392,7 +376,7 @@ class _WorkspaceshellState extends State<Workspaceshell> {
                       child: activeDocumentProvider.activeDocument == null
                           ? Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text('No Document Exists in this Workspace',
+                            child: Text('Create a file and start coding',
                                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 16,fontFamily: 'monospace'),
                                         ),
                           )
@@ -520,8 +504,7 @@ Widget _buildEditor(WorkspaceDocumentProvider provider) {
             maxLines: null,
             // padding: EdgeInsets.all(12),
           cursorColor: AppColors.primary,
-          textStyle: const TextStyle(
-            fontFamily: 'monospace',
+          textStyle: GoogleFonts.jetBrainsMono(
             fontSize: 14,
             color: Colors.white,
           ),
@@ -577,7 +560,10 @@ void showCreateDocumentDialog() {
     builder: (context) {
 
       return AlertDialog(
-        title: const Text("Create New File"),
+        title: Text("Create New File", 
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+          color: AppColors.textPrimary,
+        )),
 
         content: TextField(
           style: TextFormFieldBuilder().fieldTextStyle,
@@ -730,7 +716,11 @@ void setActiveWorkspace(WorkspaceDocumentProvider provider, Userprovider userPro
     return AlertDialog(
       title: Padding(
         padding: const EdgeInsets.only(right: 38),
-        child: Text('Workspace ID :', style: TextStyle(fontSize: 20),),
+        child: Text('Workspace ID :', 
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        ),
       ),
       content: Container(
         padding: EdgeInsets.symmetric(horizontal: 8),
@@ -742,7 +732,7 @@ void setActiveWorkspace(WorkspaceDocumentProvider provider, Userprovider userPro
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(roomID, style: Theme.of(context).textTheme.bodyMedium,),
+            Text(roomID, style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),),
             IconButton(onPressed: () {
               Clipboard.setData(
                 ClipboardData(text: roomID)
@@ -750,7 +740,7 @@ void setActiveWorkspace(WorkspaceDocumentProvider provider, Userprovider userPro
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackbarBuilder().snackbarBuilder(content: 'Copied to Clipboard')
               );
-            }, icon: Icon(Icons.copy, color: Theme.of(context).iconTheme.color,))
+            }, icon: Icon(Icons.copy, color: AppColors.textPrimary,))
           ],
         ),
       ),
@@ -762,4 +752,118 @@ void setActiveWorkspace(WorkspaceDocumentProvider provider, Userprovider userPro
     );
   });
  }
+
+} // End of Stateful Widget
+
+
+
+
+
+
+// DOCUMENT TILE EFFECT
+class _DocumentTile extends StatefulWidget {
+  final String name;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const _DocumentTile({
+    required this.name,
+    required this.isSelected,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  State<_DocumentTile> createState() => _DocumentTileState();
+}
+
+class _DocumentTileState extends State<_DocumentTile> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+
+      child: GestureDetector(
+        onTap: widget.onTap,
+
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeInOut,
+
+          margin: const EdgeInsets.symmetric(vertical: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+
+          transform: isHovered
+              // ignore: deprecated_member_use
+              ? (Matrix4.identity()..scale(1.02))
+              : Matrix4.identity(),
+
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                // ignore: deprecated_member_use
+                ? AppColors.primary.withOpacity(0.15) // 🔥 selected
+                : isHovered
+                    // ignore: deprecated_member_use
+                    ? AppColors.surface.withOpacity(0.6)
+                    : Colors.transparent,
+
+            borderRadius: BorderRadius.circular(12),
+
+            border: Border.all(
+              color: widget.isSelected
+                  ? AppColors.primary
+                  : isHovered
+                      ? AppColors.primaryVariant
+                      : AppColors.border,
+            ),
+          ),
+
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+
+              /// LEFT SIDE
+              Row(
+                children: [
+                  Icon(
+                    Icons.file_copy,
+                    size: 20,
+                    color: widget.isSelected
+                        ? AppColors.primary
+                        : isHovered
+                            ? AppColors.primaryVariant
+                            : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 8),
+
+                  Text(
+                    widget.name,
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
+                  ),
+                ],
+              ),
+
+              /// DELETE BUTTON
+              IconButton(
+                onPressed: widget.onDelete,
+                icon: Icon(
+                  Icons.delete,
+                  color: Colors.red[900],
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

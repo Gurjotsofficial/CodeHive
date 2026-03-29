@@ -170,7 +170,7 @@ router.post('/createWorkspaceDocument/:workspace_id', isValidUser, async(req,res
 
         if(workspace.owner_id.toString() == owner_id.toString()){
 
-            const newDocument = await DOCUMENT.create({name, workspace_id})
+            const newDocument = await DOCUMENT.create({name, workspace_id, content : "// Start Coding in Javascript"})
 
             return res.status(201).json({
                 success : true,
