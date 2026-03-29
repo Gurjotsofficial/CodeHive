@@ -16,6 +16,7 @@ CodeHive is a real-time collaborative code editor that allows multiple users to 
 - ⚡ Flutter-based responsive UI
 - 🌐 Node.js + MongoDB backend
 - 🎨 Clean and modern UI with custom theming
+- 📱 Responsive design for mobile and desktop
 ---
 
 ## 🏗️ Project Structure
