@@ -1,5 +1,5 @@
 import 'package:collab_code_editor/workspace_document/workspacedocumentmodel.dart';
-import 'package:collab_code_editor/workspace_document/workspacedocumentservices.dart';
+import 'package:collab_code_editor/services/workspacedocumentservices.dart';
 import 'package:flutter/material.dart';
 
 class WorkspaceDocumentProvider extends ChangeNotifier {

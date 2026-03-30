@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:collab_code_editor/services/api_url.dart';
 import 'package:collab_code_editor/services/authservices.dart';
 import 'package:collab_code_editor/workspace/workspacemodel.dart';
 import 'package:collab_code_editor/workspace_document/workspacedocumentmodel.dart';
@@ -7,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WorkspaceDocumentsservices {
+  final baseUrl = BaseUrl.baseUrl;
 
   Future<List<WorkspaceDocumentModel>> fetchWorkspaceDocuments(String workspaceId) async{
     debugPrint('Fetch Document Service Called');
@@ -19,7 +21,7 @@ class WorkspaceDocumentsservices {
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.get(Uri.parse("http://localhost:4000/api/v1/getWorkspaceDocument/$workspaceId"),
+              http.Response response = await http.get(Uri.parse("$baseUrl/api/v1/getWorkspaceDocument/$workspaceId"),
               headers: {
                 "Content-Type": "application/json",
                 "Authorization" : "Bearer $token"
@@ -64,7 +66,7 @@ class WorkspaceDocumentsservices {
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.post(Uri.parse("http://localhost:4000/api/v1/create_workspace"),
+              http.Response response = await http.post(Uri.parse("$baseUrl/api/v1/create_workspace"),
               headers: {
                 "Content-Type": "application/json",
                 "Authorization" : "Bearer $token"
@@ -109,7 +111,7 @@ class WorkspaceDocumentsservices {
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.put(Uri.parse("http://localhost:4000/api/v1/updateWorkspaceDocument/$documentID"),
+              http.Response response = await http.put(Uri.parse("$baseUrl/api/v1/updateWorkspaceDocument/$documentID"),
               headers: {
                 "Content-Type": "application/json",
                 "Authorization" : "Bearer $token"
@@ -164,7 +166,7 @@ Future<WorkspaceDocumentModel?> createDocument(
 
       http.Response response = await http.post(
         Uri.parse(
-          "http://localhost:4000/api/v1/createWorkspaceDocument/$workspaceId",
+          "$baseUrl/api/v1/createWorkspaceDocument/$workspaceId",
         ),
         headers: {
           "Content-Type": "application/json",
@@ -210,7 +212,7 @@ Future<bool> deleteWorkspaceDocument(String documentId) async{
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.delete(Uri.parse("http://localhost:4000/api/v1/deleteWorkspaceDocument/$documentId"),
+              http.Response response = await http.delete(Uri.parse("$baseUrl/api/v1/deleteWorkspaceDocument/$documentId"),
               headers: {
                 "Content-Type": "application/json",
                 "Authorization" : "Bearer $token"

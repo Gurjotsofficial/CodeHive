@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:collab_code_editor/services/api_url.dart';
 import 'package:collab_code_editor/services/authservices.dart';
 import 'package:collab_code_editor/workspace/workspacemodel.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Workspaceservices {
+  final baseUrl = BaseUrl.baseUrl;
 
   Future<List<WorkspaceModel>?> fetchWorkspaces() async{
     try {
@@ -17,7 +19,7 @@ class Workspaceservices {
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.get(Uri.parse("http://localhost:4000/api/v1/get_workspace"),
+              http.Response response = await http.get(Uri.parse("$baseUrl/api/v1/get_workspace"),
               headers: {
                 "Authorization" : "Bearer $token"
               }
@@ -60,7 +62,7 @@ class Workspaceservices {
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.post(Uri.parse("http://localhost:4000/api/v1/create_workspace"),
+              http.Response response = await http.post(Uri.parse("$baseUrl/api/v1/create_workspace"),
               headers: {
                 "Content-Type": "application/json",
                 "Authorization" : "Bearer $token"
@@ -104,7 +106,7 @@ Future<WorkspaceModel?> joinRoomService(String workspaceId) async{
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.get(Uri.parse("http://localhost:4000/api/v1/join_room/$workspaceId"),
+              http.Response response = await http.get(Uri.parse("$baseUrl/api/v1/join_room/$workspaceId"),
               headers: {
                 "Authorization" : "Bearer $token"
               }

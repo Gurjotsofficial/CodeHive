@@ -1,7 +1,7 @@
 import 'package:collab_code_editor/services/authservices.dart';
 import 'package:collab_code_editor/user/userprovider.dart';
 import 'package:collab_code_editor/workspace/workspaceprovider.dart';
-import 'package:collab_code_editor/workspace/workspaceservices.dart';
+import 'package:collab_code_editor/services/workspaceservices.dart';
 // import 'package:collab_code_editor/user/userprovider.dart';
 import 'package:flutter/material.dart';
 

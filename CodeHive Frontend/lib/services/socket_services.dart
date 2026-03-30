@@ -1,13 +1,15 @@
+import 'package:collab_code_editor/services/api_url.dart';
 import 'package:flutter/material.dart';
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketService {
   late IO.Socket socket;
+  final baseUrl = BaseUrl.baseUrl;
 
   void connect() {
     socket = IO.io(
-      'http://localhost:4000',
+      baseUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'package:collab_code_editor/services/api_url.dart';
 import 'package:collab_code_editor/services/authservices.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ExecutionServices {
+
+  final baseUrl = BaseUrl.baseUrl;
 
   Future<Map<String, dynamic>?> executeCode(String code, String input) async{
     try{
@@ -16,7 +19,7 @@ class ExecutionServices {
               // debugPrint("${AuthServices.AUTHKEY} = $token");
 
               // here we store our response from the api hit in a response named varialbe
-              http.Response response = await http.post(Uri.parse("http://localhost:4000/api/v1/execute"),
+              http.Response response = await http.post(Uri.parse("$baseUrl/api/v1/execute"),
               headers: {
                 "Content-Type": "application/json",
                 "Authorization" : "Bearer $token"
