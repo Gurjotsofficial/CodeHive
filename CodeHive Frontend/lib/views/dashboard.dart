@@ -45,13 +45,7 @@ class _DashboardState extends State<Dashboard> {
                     child: IconButton(
                       hoverColor: Colors.transparent,
                       tooltip: 'Open Sidebar',
-                      icon: Image.asset(
-                        'assets/images/codehive_logo.png',
-                          // height: 46,
-                          // width: 46,
-
-                          scale: 15.5,
-                      ),
+                      icon: Icon(Icons.menu),
                       onPressed: () {
                         setState(() => isSideBarOpen = true);
                       },
