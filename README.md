@@ -1,6 +1,6 @@
 🚀 CodeHive – Collaborative Coding & Execution Platform
 
-CodeHive is a real-time collaborative code editor that allows multiple users to work together on code seamlessly. It is designed to provide a smooth coding experience with live synchronization, workspace management, and user-based interactions.
+CodeHive is a real-time collaborative coding platform that allows multiple users to work together on code seamlessly. It is designed to provide a smooth coding experience with live synchronization, workspace management, and user-based interactions.
 
 ---
 
